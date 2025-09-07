@@ -1,0 +1,36 @@
+from flask import Flask, request
+import requests
+
+app = Flask(__lixcore__)
+
+
+BOT_TOKEN = "8169651981:AAH8dg0_Xvtsu74_iMsdT_BEaxF-IeZLpxY"
+SECRET_KEY = "secret123"  
+TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
+
+@app.route("/")
+def home():
+    return "Bot is running!"
+
+@app.route(f"/webhook/{SECRET_KEY}", methods=["POST"])
+def webhook():
+    data = request.json
+    if "message" in data:
+        chat_id = data["message"]["chat"]["id"]
+        text = data["message"].get("text", "")
+
+        # رد بسيط للتجربة
+        if text == "/start":
+            send_message(chat_id, "أهلا بيك 👋! البوت شغال.")
+        else:
+            send_message(chat_id, f"إنت كتبت: {text}")
+
+    return "ok"
+
+def send_message(chat_id, text):
+    url = f"{TELEGRAM_API}/sendMessage"
+    payload = {"chat_id": chat_id, "text": text}
+    requests.post(url, json=payload)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
